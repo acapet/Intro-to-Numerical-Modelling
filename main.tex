@@ -1,0 +1,108 @@
+\documentclass[final,xcolor=dvipsnames]{beamer}
+%
+% Choose how your presentation looks.
+%
+% For more themes, color themes and font themes, see: 
+% http://deic.uab.es/~iblanes/beamer_gallery/index_by_theme.html
+%
+\mode<presentation>
+{
+  \usetheme{Boadilla}      % or try Darmstadt, Madrid, Warsaw, ...
+  \usecolortheme{default} % or try albatross, beaver, crane, ...
+  \usefonttheme{structurebold}  % or try serif, structurebold, ...
+  \setbeamertemplate{navigation symbols}{}
+  \setbeamertemplate{caption}[numbered]
+} 
+
+\usepackage[english]{babel}
+\usepackage[utf8x]{inputenc}
+\usepackage[]{caption}
+\usepackage{tikz}
+
+
+%the-sun-is-in-love-with-the-moon-collab-with-blaak.jpg
+
+%\titlegraphic{\includegraphics[]{the-sun-is-in-love-with-the-moon-collab-with-blaak.jpg} \hspace{2cm} \includegraphics[width=2cm]}}
+\title[Introduction to Environmental Modelling]{Introduction to Environmental Modelling}
+\subtitle{Face-It Summer School 2019 : Marine Biogeochemical Cycling: from measurements to modelling}
+\author[A. Capet]{A. Capet, M.Grégoire, K. Soetaert - acapet@ulg.ac.be} %Logo de MAST +logo interface sur chaque slide et page de garde interface?
+\institute[http://labos.ulg.ac.be/mast/]{MAST}
+\date[Oct 2019]
+
+\AtBeginSection[]{
+  \begin{frame}
+  \vfill
+  \centering
+  \begin{beamercolorbox}[sep=8pt,center,shadow=true,rounded=true]{title}
+    \usebeamerfont{title}\insertsectionhead\par%
+  \end{beamercolorbox}
+  \vfill
+  \end{frame}
+}
+
+\begin{document}
+
+% \usebackgroundtemplate{%             declare it
+% \tikz[overlay,remember picture] \node[opacity=0.6, at=(current page.center)] {
+%   \includegraphics[height=\paperheight,width=\paperwidth]{the-sun-is-in-love-with-the-moon-collab-with-blaak.jpg}
+%   };
+%   % {Great_Barrier_Reef_Australia}};
+% }
+
+\begin{frame}
+  \titlepage
+\end{frame}
+
+% \usebackgroundtemplate{ }  
+
+\section{Basics Concepts}
+\begin{frame}{What is a model ?}
+\visible<2>{
+ A \alert{simplified} representation of a complex phenomenon.} 
+\end{frame}
+
+\begin{frame}{How simple ?}
+\centering{Arguments in favor of:}
+\begin{columns}
+\begin{column}{.5\framewidth}
+\centering{\alert{Simplicity}}
+\end{column}
+\begin{column}{.5\framewidth}
+\centering{\alert{Complexity}}
+\end{column}
+\end{columns}
+\end{frame}
+
+
+\section{Elements of a model}
+\subsection{Research Questions}
+\subsection{Scales}
+\subsection{State Variables}
+\subsection{Dynamic Equation}
+\subsection{Conservation ?}
+\subsection{External Inputs}
+\subsection{'Observable Variables'}
+\subsection{Integration}
+
+
+
+\section{A practical example : Mussels on Wind Farms}
+\subsection{State Variables}
+
+\subsection{Fluxes}
+
+\subsection{Integration}
+
+
+\begin{frame}{What are ressources ?}
+ A factor that
+ \begin{itemize}
+ \item has a given availability
+ \item leads to higher growth as availability increases
+ \item is consumed by the population(s)
+ \end{itemize}
+ Multiple factors can be considered as resources if they meet the above criteria for some range of other factors availability.
+\end{frame}
+
+\end{document}
+
