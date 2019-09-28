@@ -5,6 +5,9 @@
 % For more themes, color themes and font themes, see: 
 % http://deic.uab.es/~iblanes/beamer_gallery/index_by_theme.html
 %
+
+%the-sun-is-in-love-with-the-moon-collab-with-blaak.jpg
+
 \mode<presentation>
 {
   \usetheme{Boadilla}      % or try Darmstadt, Madrid, Warsaw, ...
@@ -19,29 +22,46 @@
 \usepackage[]{caption}
 \usepackage{tikz}
 
+\usepackage{phaistos}
 
-%the-sun-is-in-love-with-the-moon-collab-with-blaak.jpg
+%% Section name as title %%% 
+%\addtobeamertemplate{frametitle}{\let\insertframetitle\insertsubsectionhead}{}
+%\addtobeamertemplate{frametitle}{\let\insertframesubtitle\insertsectionhead}{}
+%\makeatletter
+%  \CheckCommand*\beamer@checkframetitle{\@ifnextchar\bgroup\beamer@inlineframetitle{}}
+%  \renewcommand*\beamer@checkframetitle{\global\let\beamer@frametitle\relax\@ifnextchar\bgroup\beamer@inlineframetitle{}}
+%\makeatother
+%% %% %% %% 
 
 %\titlegraphic{\includegraphics[]{the-sun-is-in-love-with-the-moon-collab-with-blaak.jpg} \hspace{2cm} \includegraphics[width=2cm]}}
 \title[Introduction to Environmental Modelling]{Introduction to Environmental Modelling}
 \subtitle{Face-It Summer School 2019 : Marine Biogeochemical Cycling: from measurements to modelling}
-\author[A. Capet]{A. Capet, M.Grégoire, K. Soetaert - acapet@ulg.ac.be} %Logo de MAST +logo interface sur chaque slide et page de garde interface?
-\institute[http://labos.ulg.ac.be/mast/]{MAST}
+\author[A. Capet]{A. Capet, M.Grégoire, K. Soetaert} %Logo de MAST +logo interface sur chaque slide et page de garde interface?
+\institute[http://labos.ulg.ac.be/mast/]{MAST - acapet@ulg.ac.be}
 \date[Oct 2019]
 
-\AtBeginSection[]{
-  \begin{frame}
-  \vfill
-  \centering
-  \begin{beamercolorbox}[sep=8pt,center,shadow=true,rounded=true]{title}
-    \usebeamerfont{title}\insertsectionhead\par%
-  \end{beamercolorbox}
-  \vfill
-  \end{frame}
+%\AtBeginSubsection[]{
+%  \begin{frame}
+%  \vfill
+%  \centering
+%  \begin{beamercolorbox}[sep=8pt,center,shadow=true,rounded=true]{title}
+%    \usebeamerfont{title}\insertsectionhead\par%
+%    \usebeamerfont{title}\insertsubsectionhead\par%
+%  \end{beamercolorbox}
+%  \vfill
+%  \end{frame}
+%}
+
+\AtBeginSubsection[]{
+  \frame<beamer>{ 
+    \frametitle{Outline}   
+    \tableofcontents[currentsection,currentsubsection] 
+  }
 }
 
 \begin{document}
-
+\def\mussel{\PHoxBack}
+\def\extitle[#1]{\centering{ \mussel \hspace{2cm} #1 \hspace{2cm} \mussel}}
 % \usebackgroundtemplate{%             declare it
 % \tikz[overlay,remember picture] \node[opacity=0.6, at=(current page.center)] {
 %   \includegraphics[height=\paperheight,width=\paperwidth]{the-sun-is-in-love-with-the-moon-collab-with-blaak.jpg}
@@ -56,7 +76,8 @@
 % \usebackgroundtemplate{ }  
 
 \section{Basics Concepts}
-\begin{frame}{What is a model ?}
+\subsection{What is a model ?}
+\begin{frame}
 \visible<2>{
  A \alert{simplified} representation of a complex phenomenon.} 
 \end{frame}
@@ -78,86 +99,170 @@
 \subsection{Research Questions}
 
 \begin{frame}
-\begin{block}{Aim of sutdy}
+\begin{block}{Research Questions}
 \begin{itemize}
-    \item to develop a one-dimensional model that simulates the
-\end{itemize} 
-dynamics of different local processes occurring in the water column of a pelagic
-system, under the presence of an installed turbine that is covered with the blue
-mussel Mytilus edulis.
-
-Our study mainly focuses on
-the increased production of organic matter (faeces and pseudofaeces),
-food depletion by the growth of biofouling organisms
-impacts on biogeochemical processes via respiration and excretion. 
-
-The main objectives are: 
-
-i) to test how deep the blue mussels can grow in the structure under mixed and stratified conditions of the \textbf<2>{water} column,
-ii) to determine if there will be local depletion of food resources
-such as phytoplankton, zooplankton and detritus,
-iii) to test if the mussels that grow on the seabed will have the same effect as the mussel beds located on the upper layers of the structure iv) to test if the type of turbine and the distance between the turbines has an effect on the accumulation of mussel’s biomass and on ecosystem and biogeochemical dynamics.
+    \item Clear formulation of the research question should lead decisions for all elements of the model 
+\end{itemize}
 \end{block}
+\end{frame}
+
+\begin{frame}
+\begin{exampleblock}{\extitle[Research Context]}
+
+Our study mainly focuses on 
+\begin{itemize}
+    \item increased production of organic matter (faeces and pseudofaeces)
+    \item food depletion by the growth of biofouling %organisms
+    \item impacts on biogeochemical processes via respiration and excretion. 
+\end{itemize}
+\end{exampleblock}
+\end{frame}
+
+\begin{frame}
+\begin{exampleblock}{\extitle[Research Questions]}
+The main objectives are: 
+\begin{itemize}
+    \item how deep can the blue mussels grow  (mixed/stratified)  conditions of the water column,
+    \item to determine if there will be local depletion of food resources such as phytoplankton, zooplankton and detritus,
+    \item to test if the mussels that grow on the seabed will have the same effect as the mussel beds located on the upper layers of the structure 
+    \item to test if the type of turbine and the distance between the turbines has an effect on the accumulation of mussel’s biomass and on ecosystem and biogeochemical dynamics.
+\end{itemize}
+\end{exampleblock}
 \end{frame}
 
 \subsection{Scales}
+\begin{frame}
+\begin{block}{Spatial Scales}
+\begin{itemize}[<+->]
+    \item Relevant scales for system dynamics ?
+    \item Relevant scale for operating processes ?
+    \item Non-linearities ?
+    \item Anisotropy? In forcings ? in processes ?
+    \item Length scale of spatial resolution for available observations ?
+    \item Memory ! 
+\end{itemize}
+\end{block}
+
+\pause
+
+\begin{exampleblock}{\extitle[Spatial Scales]}
+\begin{itemize}
+    \item 1-dimension
+    \item 25 m pylone
+    \item 50 layers of 0.5 m each
+    \item Horizontal lenght scales
+\end{itemize} 
+\end{exampleblock}
+
+\end{frame}
 
 \begin{frame}
-\begin{block}{Aim of sutdy}
+\begin{block}{Temporal Scales}
+\begin{itemize}[<+->]
+    \item Relevant scales for system dynamics
+    \item Relevant scale for operating processes
+    \item Non-linearities
+    \item Periodicity in forcings ?  
+    \item CPU ! 
+\end{itemize}
+\end{block}
+
+\end{frame}
+
+
+
+\subsection{State Variables}
+\begin{frame}
+NPZD Approach
+Common Currency : Nitrogen
+\begin{exampleblock}{State variables}
 \begin{itemize}
-    \item to develop a one-dimensional model that simulates the
+    \item ammonium (NH4),
+    \item nitrate (NO3),
+    \item phytoplankton (PHYTO)
+    \item zooplankton (ZOO)
+    \item detritus (PELDETRITUS),
+    \item bottom detritus (BOTDETRITUS)
 \end{itemize} 
-dynamics of different local processes occurring in the water column of a pelagic
-system, under the presence of an installed turbine that is covered with the blue
-mussel Mytilus edulis.
+\end{exampleblock}
 
-Our study mainly focuses on
-the increased production of organic matter (faeces and pseudofaeces),
-food depletion by the growth of biofouling organisms
-impacts on biogeochemical processes via respiration and excretion. 
+\begin{exampleblock}
+Two domains of different dimensionality.
+\end{exampleblock}
+\end{frame}
 
-The main objectives are: 
-
-i) to test how deep the blue mussels can grow in the structure under mixed and stratified conditions of the \textbf<2>{water} column,
-ii) to determine if there will be local depletion of food resources
-such as phytoplankton, zooplankton and detritus,
-iii) to test if the mussels that grow on the seabed will have the same effect as the mussel beds located on the upper layers of the structure iv) to test if the type of turbine and the distance between the turbines has an effect on the accumulation of mussel’s biomass and on ecosystem and biogeochemical dynamics.
+\subsection{Dynamic Equation}
+\begin{frame}
+\begin{block}{Mass Blance Equation}
+\begin{itemize}
+    \item Only N limits phyto growth
+    \item Both NH4 and NO3 Uptaken, but NH3 favored (limitation).
+    \item Light limits plankton Growth  
+    \item Liebig's law of the minimum
+    \item Mussels feeds on Phytoplankton
+    \item Zooplankton feeds on phytoplankton
+\end{itemize} 
 \end{block}
 \end{frame}
 
 
-
-\subsection{State Variables}
-
 \begin{frame}
- Tsting GIT
+\begin{exampleblock}{Assumptions}
+\begin{itemize}
+    \item Only N limits phyto growth
+    \item Both NH4 and NO3 Uptaken, but NH3 favored (limitation).
+    \item Light limits plankton Growth  
+    \item Liebig's law of the minimum
+    \item Mussels feeds on Phytoplankton
+    \item Zooplankton feeds on phytoplankton
+\end{itemize} 
+\end{exampleblock}
 \end{frame}
 
-\subsection{Dynamic Equation}
 \subsection{Conservation ?}
+
 \subsection{External Inputs}
-\subsection{'Observable Variables'}
-\subsection{Integration}
+\begin{frame}
 
-
-
-\section{A practical example : Mussels on Wind Farms}
-\subsection{State Variables}
-
-\subsection{Fluxes}
-
-\subsection{Integration}
-
-
-\begin{frame}{What are ressources ?}
- A factor that
- \begin{itemize}
- \item has a given availability
- \item leads to higher growth as availability increases
- \item is consumed by the population(s)
- \end{itemize}
- Multiple factors can be considered as resources if they meet the above criteria for some range of other factors availability.
+\begin{exampleblock}{Scales}
+\begin{itemize}
+    \item a one-dimensional k-$\epsilon$ turbulence closure model 
+    \item Temperature
+    \item Current Velocity
+    \item Turbulent Kinetic Energy
+    \item (Salinity Constant)
+\end{itemize} 
+\end{exampleblock}
 \end{frame}
+
+
+
+\section{Integration}
+\begin{frame}{Frame Title}
+    
+\end{frame}
+
+
+\section{Model VS Real World}
+
+
+\subsection{Error Observations}
+\begin{frame}{Frame Title}
+    
+
+* Difficulty in confronting discrete sampling with model continuous observations. 
+* Match the definition of state variables.
+
+\begin{exampleblock}{Observations}
+\begin{itemize}
+    \item Nutrients (upwind, downwind)
+    \item Phytoplankton (which proxy)
+    \item Sediment content (heterogeneity)
+    \item .. 
+\end{itemize} 
+\end{exampleblock}
+\end{frame}
+
 
 \end{document}
 
