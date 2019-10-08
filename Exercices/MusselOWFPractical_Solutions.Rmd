@@ -5,10 +5,10 @@ date: "October 1, 2019"
 output: 
 #  pdf_document:
 #    toc: yes
-#  slidy_presentation:
-#    toc: yes
-  github_document:
+  slidy_presentation:
     toc: yes
+#  github_document:
+#    toc: yes
 ---
 
 ```{r knitr_setup, include=FALSE}
@@ -578,6 +578,11 @@ outres3<- ode.1D(y = yini,
                  lrw = 20000,
                  names = names)
 
+```
+
+```{r,warning=FALSE}
+
+
  
 plot(outres, outres3, 
      which = c("totalFallingBivalve"),
@@ -594,14 +599,12 @@ legend("bottomright",
        cex=0.8, 
        c(as.character(parms[modifiedParameterName]),as.character(parms3[modifiedParameterName])),
        title = modifiedParameterName)
-```
 
-```{r,warning=FALSE}
 plot(outres, outres3, 
-     which = c("TotalNPP","Biomass_M"),
-     main= c("Changes in NPP","Mussel Biomass"),
+     which = c("TotalNPP","Biomass_M","totalFallingBivalve"),
+     main= c("Net Primary Production","Mussel Biomass","Falling mussels"),
      xlabel = "Time [days]",
-     ylabel = c("NPP [mmolN/m3/d]","Biomass"),
+     ylabel = c("[mmolN/m3/d]","[gDW/m2]","[mmolN/m3/d]"),
      cex.main=0.8)
 
 # XXX Make it pick the right value for the legend. 
@@ -636,7 +639,7 @@ modifiedParameterValue <- 100
 parms4[modifiedParameterName]=modifiedParameterValue
 
 # The "Dist" parameters impact on the definition of initial conditions BIVAL. 
-# So those should redefined after dist has been changed. 
+# So those should redefined after Dist has been changed. 
 
 BivalArealInit <- 191.857  # [mmolN/m2] Initial Bivalve Areal Concentration
 bivPres  <- as.numeric(grid$x.mid>parms4["BMinDepth"]) # as.numeric converts from TRUE/FALSE to 0/1
@@ -660,9 +663,9 @@ outres4<- ode.1D(y = yini,
 plot(x=1:365*Nyears, y=outres[,50], 
      type='line',
      main='Bottom NH4',
-     xlabel = "Time [days]",
-     ylabel = "NH4 [mmolN/m3]")
-lines(x=1:365*Nyears, y=outres3[,50], 
+     xlab = "Time [days]",
+     ylab = "[mmolN/m3]")
+lines(x=1:365*Nyears, y=outres4[,50], 
       col='red')
 
 
@@ -684,10 +687,65 @@ If you see substantial changes between the end and beginning of the year, you mi
  * What substantial changes can you depict if oxygen concentration is lower ? 
 ```{r}
 # O2 was set here only has a parameter in the global environment. 
-# If you change his value (eg., 'O2<-200'), and run the model again , the results should be different. # Pay attention however, that 
+# However, the use of the "with(.." structure in the model definition allows to integrate O2 in parms as a local parameter (cf. Scope of variables). 
+
+# Pay attention however, that O2 is only set as a constant here.
+# A proper inclusion of O2 influence may require 
+# 1. A vertical resolved representation of oxygen, among other to reflect the influence of the stratification regime. 
+# 2. A dynamical response of O2 to respiration and photosynthesis rates. 
+
+parms5 <-parms4
+parms5<-c(parms5,c("O2"=100))
+modifiedParameterName  <- "O2" # For graphic's legend
+  
+outres5 <- ode.1D(y = yini,
+                 times = 1:365*Nyears,
+                 func = NPZDB,
+                 parms = parms5,
+                 nspec = 7,
+                 method = "lsodes", 
+                 lrw = 20000,
+                 names = names)
+
+
+parms6 <-parms5
+parms6['O2']<-400
+
+outres6 <- ode.1D(y = yini,
+                 times = 1:365*Nyears,
+                 func = NPZDB,
+                 parms = parms6,
+                 nspec = 7,
+                 method = "lsodes", 
+                 lrw = 20000,
+                 names = names)
+
+
+
 ```
  
- 
+```{r,warning=FALSE}
+
+plot(x=1:365*Nyears, y=outres5[,50], 
+     type='line',
+     main='Bottom NH4',
+     xlab = "Time [days]",
+     ylab = "[mmolN/m3]")
+lines(x=1:365*Nyears, y=outres6[,50], 
+      col='red')
+
+# Make it pick the right value for the legend. 
+legend("bottomright",
+       col=1:2,
+       lwd = 2,
+       lty = 1:2,
+       cex=0.8, 
+       c(as.character(parms6[modifiedParameterName]),as.character(parms5[modifiedParameterName])),
+       title = modifiedParameterName)
+
+```
+
+
  * What substantial changes can you depict when temperature are warmer by 2 celsius ? 
 ```{r}
 # To change temperature 'globally', you could simply add 2 to TempData. 
@@ -698,13 +756,234 @@ If you see substantial changes between the end and beginning of the year, you mi
 
  * What substantial changes can you depict between Mixed and Stratified conditions ? 
 ```{r}
+# If working interactively, you could simply re-execute chunk 4 : Forcings, with 'Mixed' set to 0.
+# Re-run and compare as in the above exercices. 
 
+# If the entire code is executed once, such as when produce documents from this .Rmd, you should copy the content of chunk 4 here.
 ```
 
 ## Defining New diagnostics. 
 
  * We would like to extract the rate of Organic Matter input to the sediment for a later use. Could you extract it and save it in a .csv file ? 
   
+```{r}
+# In the function defining the model above, you should add an element to the list returned by the function. 
+# This part of the code in the model definition is highlighted below (search the text for "fluxdown diagnostic")
+
+NPZDB <- function(t, y, parms) {
+  
+   # This first line ('with...' ) sets an environments in which elements of "parms" can be accessed directly.
+   # So "maxUptake" can be used instead of "parms['maxUptake']"
+  with ( as.list(parms),{ 
+    
+      #-----------------------------------------------------------------------------
+      # State Variables
+      #-----------------------------------------------------------------------------
+      # y is the 'total' state vector
+      # To ease the computation, we separate the different variables
+      NH4         <- y[1:N]
+      NO3         <- y[(N+1):(2*N)]
+      PHYTO       <- y[(2*N+1):(3*N)]
+      ZOO         <- y[(3*N+1):(4*N)]
+      BIVAL       <- y[(4*N+1):(5*N)]
+      PELDETRITUS <- y[(5*N+1):(6*N)]
+      BOTDETRITUS <- y[(6*N+1):(7*N)]
+      
+      # Daynumber
+      # ii is a time index to select the proper (ie. actual) forcing conditions. 
+      Day <- max(1,t%%365)
+      ii <- which.min (abs(Day - ffDays) )
+      
+      # Physical conditions: light, Kz and temperature for that day
+      I  <- Variables$Radiation[ii]* 0.5
+      D  <- as.vector(Kzdata[ii,]) * 3600*24 # convert in m2/d
+      TT <- as.vector(Tempdata[ii,])
+      
+      #Light absorption is computed from constant (water) and PHYTO concentration
+      kExt      <- kW + kP*PHYTO
+      ID        <- rep(I, N)
+      
+      # Ligth at each depth
+      # computed from surface solar radiation (I, read from forcing file)
+      # and attenuation coefficient at each depth
+      for(i in 1:(N-1)){
+        ID[i+1]   <- ID[i]*exp(-kExt[i]*grid$dx.aux[i])
+      }
+      PAR       <- ID[-(N+1)]*exp(-kExt*grid$dx/2)
+      
+      #-----------------------------------------------------------------------------
+      #-Transport Terms
+      # The tran.1D function from ReacTran package allows to compute the transport term in terms of dC/dt
+      # All Pelagic variables are diffused, wit diffusion coefficicent D
+      # PHYTO and PELDETRITUS are also sinking
+      # Only NH3 has a bottom flux, originated from the mineralisation of BottomDetritus. 
+      #-----------------------------------------------------------------------------
+      # XX check if you can remove the fluxdown=0
+      TranNO3         <- tran.1D(C = NO3,         D = D, v = 0,            flux.up=0, flux.down = 0, dx = grid)
+      TranPHYTO       <- tran.1D(C = PHYTO,       D = D, v = sinkingRateP, flux.up=0,                dx = grid)
+      TranZOO         <- tran.1D(C = ZOO,         D = D, v = 0,            flux.up=0,                dx = grid)
+      TranPELDETRITUS <- tran.1D(C = PELDETRITUS, D = D, v = sinkingRateD, flux.up=0,                dx = grid)
+      
+      TempFunction    <- Q10^((TT-10)/10)            # Temperature effect on BGC rates.       
+      Rox             <- mineralRateBot*O2/(O2 + KsO2)*BOTDETRITUS[N]*TempFunction[N]
+      Ranox           <- mineralRateBot*(KsinO2/(O2 + KsinO2))*BOTDETRITUS[N]*TempFunction[N]
+      
+      TranNH4         <- tran.1D(C = NH4        , D = D, v = 0, flux.up =0, flux.down = -(Rox+Ranox),dx = grid)
+      
+      #---------------------------------------------------------------------------------
+      # Reaction Terms
+      #---------------------------------------------------------------------------------
+      # 'Work Variables' and Limitation functions
+      maxBB <-  maxB*((2*pi*rr)/Dist^2)            # Carrying capacity converted from [mmolN/m2] to [mmolN/m3]
+      SA    <- (2*pi*rr*L)                         # Total surface area of the foundation
+
+      LightLimitation <- tanh((1/Iopt)*PAR)
+      DIN   <- ((NO3/(NO3+ksNO3))*exp(-yy*NH4) ) + (NH4/(NH4+ksNH4)) # ! Correction was done here !
+      alpha <- (1/DIN)*(NH4/(NH4+ksNH4))           # relative NO3/NH3 consumption for PHYTO growth
+      Limitatie        <- pmin(LightLimitation, DIN)
+      
+      # Processes
+      NPP              <- maxUptake* Limitatie*PHYTO*TempFunction
+      Grazing          <- maxGrazing* (PHYTO/(PHYTO+ksGrazing))*ZOO*TempFunction
+      GrazingBival     <- (maxClear * BIVAL * PHYTO       * (1 - (BIVAL/maxBB)))*TempFunction
+      GrazingBivalZoo  <- (maxClear * BIVAL * ZOO         * (1 - (BIVAL/maxBB)))*TempFunction
+      ConsumptDet      <- (maxClear * BIVAL * PELDETRITUS * (1 - (BIVAL/maxBB)))*TempFunction
+      Faeces           <- pFaeces * Grazing                    # Faeces from ZOO
+      FaecesBP         <- pFaecesBP * (GrazingBival)
+      FaecesBD         <- pFaecesBD *(ConsumptDet)
+      FaecesBZ         <- pFaecesBZ*(GrazingBivalZoo)
+      PseudofaecesP    <- pPseudoP * (GrazingBival)
+      PseudofaecesZ    <- pPseudoZ * (GrazingBivalZoo)
+      PseudofaecesD    <- pPseudoD * (ConsumptDet)
+      ZooGrowth        <- (1-pFaeces) * Grazing
+      Excretion        <- excretionRate * ZOO *TempFunction #XX -> ExcretionZOO
+      ExcretionBival   <- (excretionRateB*BIVAL)*TempFunction
+      RespirationZoo   <- respirationRate*ZOO*TempFunction
+      RespirationBival <- respirationRateB*BIVAL*TempFunction
+      MortalityPhy     <- mortalityRatePhyt * PHYTO*TempFunction
+      Mortality        <- mortalityRateZoo * ZOO * ZOO*TempFunction
+      MineralisationAerobic   <- mineralRatePel * PELDETRITUS * O2/(O2+KsO2)*TempFunction
+      MineralisationAnaerobic <- mineralRatePel * PELDETRITUS * KsinO2/(O2+KsinO2)*TempFunction
+      Nitrification    <- NitR * NH4 * O2/(O2+KsO2) * TempFunction
+      
+      FallingBivalve      <- pFall*BIVAL
+      totalFallingBivalve <- sum(FallingBivalve *grid$dx)
+      fluxdown            <- TranPELDETRITUS$flux.down + TranPHYTO$flux.down + totalFallingBivalve
+
+      #---------------------------------------------------------------------------------
+      # Mass balances [mmolN/m3/day]
+      #---------------------------------------------------------------------------------
+      dNH4    <- TranNH4$dC + Excretion + ExcretionBival +
+        MineralisationAerobic + MineralisationAnaerobic +
+        - alpha*NPP - Nitrification + RespirationZoo + RespirationBival
+      
+      dNO3    <- TranNO3$dC + Nitrification - ((1-alpha)*NPP)
+      
+      dPHYTO  <- TranPHYTO$dC + NPP - Grazing - GrazingBival - MortalityPhy
+      
+      dZOO    <- TranZOO$dC +ZooGrowth - Excretion - Mortality - RespirationZoo -GrazingBivalZoo
+      
+      dBIVAL  <- GrazingBival + GrazingBivalZoo - FaecesBP - FaecesBD - FaecesBZ - ExcretionBival +
+        - FallingBivalve -RespirationBival-PseudofaecesP -PseudofaecesZ - PseudofaecesD + ConsumptDet
+      
+      dPELDETRITUS <- TranPELDETRITUS$dC+ Mortality + Faeces + FaecesBP + FaecesBD + FaecesBZ -
+        MineralisationAerobic - MineralisationAnaerobic + MortalityPhy + PseudofaecesP + PseudofaecesZ +
+        PseudofaecesD - ConsumptDet
+      
+      # Only the bottom Cell is actually considered for BOTDETRITUS. 
+      # Other elements of this vector are not considered. 
+      # Those are initialized to zero, and their rate of changes are zero as well. 
+      dBOTDETRITUS <- c(rep(0,N-1), + fluxdown - Rox - Ranox)   
+      
+      # This defines what is returned by the model function. 
+      # The output consist in a list. 
+      # First element of the list should be a vector, of the same size of the state vector, giving the rate of change.
+      # After that, the model can provided additional diagnostics. 
+        return (
+          list(
+            # Derivatives for state Variables
+            c(dNH4 = dNH4,
+              dNO3 = dNO3,
+              dPHYTO = dPHYTO,
+              dZOO = dZOO,
+              dBIVAL= dBIVAL,
+              dPELD = dPELDETRITUS,
+              dBOTD = dBOTDETRITUS),
+            # Diagnostics
+            Total_Bottom_Detritus = BOTDETRITUS[N],
+            Kz                    = D[-1],
+            Temp                  = TT,
+            i                     = I,
+            tempa                 = mean(TT),
+            Kza                   = mean (D),
+            Biomass_M             = sum(((BIVAL*grid$dx*(RCN)*(1/1000)*12*(1/Cfrac)*(Dist^2))/(1000*SA))),
+            Biomass_Mussels       = sum((BIVAL*grid$dx*(RCN)*(1/1000)*12*(1/Cfrac)*(Dist^2))/1000),
+            Total_Phyto_Area      = sum(PHYTO*grid$dx*Dist^2*RCN*(1/1000)*12*(1/1000)),
+            Total_Phyto           = sum(PHYTO*grid$dx),
+            Total_Zoo_Area        = sum(ZOO*grid$dx*Dist^2*RCN*(1/1000)*12*(1/1000)),
+            Total_Detritus_Area   = sum(PELDETRITUS*grid$dx*Dist^2*RCN*(1/1000)*12*(1/1000)),
+            Total_Food_Area       = sum((PHYTO+ZOO+PELDETRITUS)*grid$dx*Dist^2*RCN*(1/1000)*12*(1/1000)),
+            Total_DIN             = sum((NH4+NO3)*grid$dx),
+            Total_DIN_Area        = sum((NH4+NO3)*grid$dx*Dist^2*(1/1000)*14*(1/1000)),
+            Tb                    = BOTDETRITUS[N]*Dist^2*(1/1000)*(1/1000)*12*RCN,
+            Total_Nitrogen        = sum((NH4 + NO3 + PHYTO + ZOO + BIVAL + PELDETRITUS) * grid$dx + BOTDETRITUS),
+            TotalNPP              = sum(NPP*grid$dx),
+            totalFallingBivalve   = totalFallingBivalve, 
+            # fluxdown diagnostic
+            fluxdown              = TranPELDETRITUS$flux.down + TranPHYTO$flux.down + totalFallingBivalve)
+        )
+    }
+  )
+}
+
+```
+
+
+
+```{r}
+outres4<- ode.1D(y = yini,
+                 times = 1:365*Nyears,
+                 func = NPZDB,
+                 parms = parms4,
+                 nspec = 7,
+                 method = "lsodes", 
+                 lrw = 20000,
+                 names = names)
+
+outres<- ode.1D(y = yini,
+                 times = 1:365*Nyears,
+                 func = NPZDB,
+                 parms = parms,
+                 nspec = 7,
+                 method = "lsodes", 
+                 lrw = 20000,
+                 names = names)
+
+```
+
+```{r}
+modifiedParameterName  <- "Dist" # For graphic's legend
+
+plot(outres,outres4, which='fluxdown', 
+     type='line',
+     main='OrgC Bottom Flux',
+     xlab = "Time [days]",
+     ylab = "[mmolN/m3/d]")
+
+# Make it pick the right value for the legend. 
+legend("bottomright",
+       col=1:2,
+       lwd = 2,
+       lty = 1:2,
+       cex=0.8, 
+       c(as.character(parms[modifiedParameterName]),as.character(parms4[modifiedParameterName])),
+       title = modifiedParameterName)
+```
+```{r}
+# use function "write.csv"" to save model outputs.
+```
+
+
 
 
                      
